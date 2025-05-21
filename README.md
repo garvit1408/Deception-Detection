@@ -104,7 +104,3 @@ The system consists of:
 2. Upload a CSV file with conversation data
 3. View the deception analysis results
 4. Filter and explore the conversations
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
