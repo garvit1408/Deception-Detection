@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deception Detection Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        header {
+            background-color: #1a365d;
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #1a365d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #2c4a7c;
+        }
+        .message {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .message.deceptive {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+        #fileUpload {
+            padding: 20px;
+            border: 2px dashed #ddd;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .score-high {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+        .score-medium {
+            color: #dd6b20;
+            font-weight: bold;
+        }
+        .score-low {
+            color: #38a169;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Deception Detection Dashboard</h1>
+    </header>
+    
+    <div class="container">
+        <div>
+            <div class="card">
+                <h2>Analyze Message</h2>
+                <input type="text" id="messageInput" placeholder="Enter a message to analyze">
+                <button onclick="analyzeMessage()">Analyze</button>
+                <div id="singleResult" class="message" style="margin-top: 10px; display: none;"></div>
+            </div>
+            
+            <div class="card">
+                <h2>Upload Conversation</h2>
+                <div id="fileUpload">
+                    <p>Drag and drop a CSV file here or</p>
+                    <input type="file" id="fileInput" accept=".csv">
+                    <button onclick="uploadFile()">Upload</button>
+                </div>
+                <div id="loading" class="loading">Analyzing conversation...</div>
+            </div>
+        </div>
+        
+        <div>
+            <div class="card">
+                <h2>Conversation Analysis</h2>
+                <div id="conversationResults"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = "http://localhost:8000";
+        
+        async function analyzeMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const singleResult = document.getElementById('singleResult');
+            const text = messageInput.value.trim();
+            
+            if (!text) {
+                alert('Please enter a message to analyze');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/predict`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        metadata: {}
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to analyze message');
+                }
+                
+                const result = await response.json();
+                
+                // Display the result
+                let scoreClass = 'score-low';
+                if (result.probability > 0.7) {
+                    scoreClass = 'score-high';
+                } else if (result.probability > 0.4) {
+                    scoreClass = 'score-medium';
+                }
+                
+                singleResult.innerHTML = `
+                    <p>Deception Score: <span class="${scoreClass}">${(result.probability * 100).toFixed(1)}%</span></p>
+                    ${result.reasoning ? `<p>Reasoning: ${result.reasoning}</p>` : ''}
+                `;
+                singleResult.style.display = 'block';
+                singleResult.className = `message ${result.prediction ? 'deceptive' : ''}`;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing message. Please try again later.');
+            }
+        }
+        
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const loadingDiv = document.getElementById('loading');
+            const conversationResults = document.getElementById('conversationResults');
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a file to upload');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            loadingDiv.style.display = 'block';
+            
+            try {
+                const response = await fetch(`${API_URL}/analyze-conversation`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to analyze conversation');
+                }
+                
+                const result = await response.json();
+                loadingDiv.style.display = 'none';
+                
+                // Display the conversation results
+                if (result.conversation && result.conversation.messages) {
+                    let html = `
+                        <h3>Conversation Details</h3>
+                        <p><strong>ID:</strong> ${result.conversation.id}</p>
+                        <p><strong>Overall:</strong> ${result.conversation.isDeceptive ? 'Contains deception' : 'No deception detected'}</p>
+                        <h3>Messages:</h3>
+                    `;
+                    
+                    result.conversation.messages.forEach(message => {
+                        let scoreClass = 'score-low';
+                        if (message.deceptionScore > 0.7) {
+                            scoreClass = 'score-high';
+                        } else if (message.deceptionScore > 0.4) {
+                            scoreClass = 'score-medium';
+                        }
+                        
+                        html += `
+                            <div class="message ${message.deceptionScore > 0.7 ? 'deceptive' : ''}">
+                                <p><strong>${message.sender.name}</strong> (${message.timestamp}): ${message.text}</p>
+                                <p>Deception Score: <span class="${scoreClass}">${(message.deceptionScore * 100).toFixed(1)}%</span></p>
+                                ${message.reasoning ? `<p>Reasoning: ${message.reasoning}</p>` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    conversationResults.innerHTML = html;
+                } else {
+                    conversationResults.innerHTML = '<p>No conversation data received</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                loadingDiv.style.display = 'none';
+                alert('Error analyzing conversation. Please try again later.');
+            }
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,11 @@
+cleaned_message,is_truthful,message_length,word_count,question_count,exclamation_count,has_uncertainty,has_certainty,conversation_length,msg_position_in_convo,position_ratio
+I absolutely completed all the tasks early.,0,42,7,0,0,0,1,10,0,0.0
+I think I might have finished the assignment.,1,43,8,0,0,1,0,10,1,0.1
+Did you see what happened yesterday?,1,32,6,1,0,0,0,10,2,0.2
+That's definitely not what I said!,0,33,7,0,1,0,1,10,3,0.3
+I'm not sure if I can attend the meeting tomorrow.,1,48,11,0,0,1,0,10,4,0.4
+Trust me, I never talked to him about it.,0,40,9,0,0,0,1,10,5,0.5
+Maybe we should consider other options?,1,38,6,1,0,1,0,10,6,0.6
+I absolutely never saw that email before today.,0,45,8,0,0,0,1,10,7,0.7
+Could you possibly help me with this task?,1,41,8,1,0,1,0,10,8,0.8
+I know exactly where I was at 9pm last night!,0,44,11,0,1,0,1,10,9,0.9 

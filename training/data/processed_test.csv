@@ -1,0 +1,7 @@
+cleaned_message,is_truthful,message_length,word_count,question_count,exclamation_count,has_uncertainty,has_certainty,conversation_length,msg_position_in_convo,position_ratio
+The report will be ready by tomorrow morning.,1,42,9,0,0,0,0,6,0,0.0
+Believe me, I've always been honest with you.,0,44,9,0,0,0,1,6,1,0.16
+I think there might be a problem with the system.,1,47,10,0,0,1,0,6,2,0.33
+I definitely sent that email yesterday afternoon!,0,48,7,0,1,0,1,6,3,0.5
+Can you explain how this works again?,1,39,7,1,0,0,0,6,4,0.66
+I know with absolute certainty that I'm right.,0,45,9,0,0,0,1,6,5,0.83 

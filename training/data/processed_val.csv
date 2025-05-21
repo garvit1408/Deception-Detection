@@ -1,0 +1,6 @@
+cleaned_message,is_truthful,message_length,word_count,question_count,exclamation_count,has_uncertainty,has_certainty,conversation_length,msg_position_in_convo,position_ratio
+I'm planning to visit my parents this weekend.,1,45,9,0,0,0,0,5,0,0.0
+I swear I didn't take anything from the office.,0,46,10,0,0,0,1,5,1,0.2
+Have you considered asking for an extension?,1,44,7,1,0,1,0,5,2,0.4
+I'm 100% certain that I locked the door!,0,41,9,0,1,0,1,5,3,0.6
+I may need to reschedule our meeting.,1,36,7,0,0,1,0,5,4,0.8 
